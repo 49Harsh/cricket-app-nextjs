@@ -6,10 +6,10 @@ export type CounterDocument = Counter & Document;
 @Schema()
 export class Counter {
   @Prop({ required: true, unique: true })
-  id: string;
+  id!: string;
 
   @Prop({ default: 1000 })
-  seq: number;
+  seq!: number;
 }
 
 export const CounterSchema = SchemaFactory.createForClass(Counter); 

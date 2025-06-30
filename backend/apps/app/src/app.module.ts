@@ -12,7 +12,9 @@ import { Counter, CounterSchema } from './schemas/counter.schema';
 
 @Module({
   imports: [
-    MongooseModule.forRoot('mongodb://localhost:27017/cricket-app'),
+    MongooseModule.forRoot('mongodb://localhost:27017/cricket-app', {
+      serverSelectionTimeoutMS: 5000,
+    }),
     MongooseModule.forFeature([
       { name: Match.name, schema: MatchSchema },
       { name: Counter.name, schema: CounterSchema },

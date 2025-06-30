@@ -15,52 +15,52 @@ export enum EventType {
 @Schema()
 export class Commentary {
   @Prop({ required: true })
-  over: number;
+  over!: number;
 
   @Prop({ required: true })
-  ball: number;
+  ball!: number;
 
   @Prop({ required: true, enum: EventType })
-  eventType: EventType;
+  eventType!: EventType;
 
   @Prop()
-  runs: number;
+  runs?: number;
 
   @Prop()
-  batsman: string;
+  batsman?: string;
 
   @Prop()
-  bowler: string;
+  bowler?: string;
 
   @Prop()
-  description: string;
+  description?: string;
 
   @Prop({ default: Date.now })
-  timestamp: Date;
+  timestamp!: Date;
 }
 
 @Schema()
 export class Match {
   @Prop({ unique: true })
-  matchId: string;
+  matchId!: string;
 
   @Prop({ required: true })
-  team1: string;
+  team1!: string;
 
   @Prop({ required: true })
-  team2: string;
+  team2!: string;
 
   @Prop({ required: true })
-  venue: string;
+  venue!: string;
 
   @Prop({ default: Date.now })
-  startTime: Date;
+  startTime!: Date;
 
   @Prop({ default: false })
-  isPaused: boolean;
+  isPaused!: boolean;
 
   @Prop({ type: [Object], default: [] })
-  commentary: Commentary[];
+  commentary!: Commentary[];
 }
 
 export const MatchSchema = SchemaFactory.createForClass(Match); 

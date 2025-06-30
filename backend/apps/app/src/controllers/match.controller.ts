@@ -51,18 +51,20 @@ export class MatchController {
   @Post(':id/pause')
   async pauseMatch(@Param('id') id: string): Promise<Match> {
     const match = await this.matchService.pauseMatch(id);
-    if (match) {
-      this.matchGateway.emitMatchUpdate(id, match);
+    if (!match) {
+      throw new HttpException('Match not found', HttpStatus.NOT_FOUND);
     }
+    this.matchGateway.emitMatchUpdate(id, match);
     return match;
   }
 
   @Post(':id/resume')
   async resumeMatch(@Param('id') id: string): Promise<Match> {
     const match = await this.matchService.resumeMatch(id);
-    if (match) {
-      this.matchGateway.emitMatchUpdate(id, match);
+    if (!match) {
+      throw new HttpException('Match not found', HttpStatus.NOT_FOUND);
     }
+    this.matchGateway.emitMatchUpdate(id, match);
     return match;
   }
 } 

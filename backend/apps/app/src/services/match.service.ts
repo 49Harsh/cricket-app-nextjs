@@ -22,7 +22,7 @@ export class MatchService {
     return newMatch.save();
   }
 
-  async getMatchById(id: string): Promise<Match> {
+  async getMatchById(id: string): Promise<Match | null> {
     return this.matchModel.findOne({ matchId: id }).exec();
   }
 
@@ -46,7 +46,7 @@ export class MatchService {
     return match;
   }
 
-  async pauseMatch(id: string): Promise<Match> {
+  async pauseMatch(id: string): Promise<Match | null> {
     return this.matchModel.findOneAndUpdate(
       { matchId: id },
       { isPaused: true },
@@ -54,7 +54,7 @@ export class MatchService {
     ).exec();
   }
 
-  async resumeMatch(id: string): Promise<Match> {
+  async resumeMatch(id: string): Promise<Match | null> {
     return this.matchModel.findOneAndUpdate(
       { matchId: id },
       { isPaused: false },
