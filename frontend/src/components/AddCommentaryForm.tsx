@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { addCommentary } from '../utils/api';
+import React, { useState, useEffect } from 'react';
+import { addCommentary, fetchMatchById } from '../utils/api';
 
 interface AddCommentaryFormProps {
   matchId: string;
@@ -18,6 +18,46 @@ const AddCommentaryForm: React.FC<AddCommentaryFormProps> = ({ matchId, onCommen
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [lastCommentary, setLastCommentary] = useState<{over: number, ball: number} | null>(null);
+
+  // Fetch last ball information when component mounts or match changes
+  useEffect(() => {
+    const getLastCommentary = async () => {
+      try {
+        const matchData = await fetchMatchById(matchId);
+        if (matchData.commentary && matchData.commentary.length > 0) {
+          const commentaries = matchData.commentary;
+          const lastItem = commentaries[commentaries.length - 1];
+          setLastCommentary({ over: lastItem.over, ball: lastItem.ball });
+          
+          // Calculate next ball position
+          let nextOver = lastItem.over;
+          let nextBall = lastItem.ball;
+          
+          // If it's not a wide or no-ball, increment the ball count
+          if (!['wide'].includes(lastItem.eventType)) {
+            nextBall++;
+          }
+          
+          // If we've reached 6 balls, move to next over
+          if (nextBall > 5) {
+            nextOver++;
+            nextBall = 0;
+          }
+          
+          setFormData(prev => ({
+            ...prev,
+            over: nextOver,
+            ball: nextBall
+          }));
+        }
+      } catch (err) {
+        console.error('Failed to fetch last ball information:', err);
+      }
+    };
+    
+    getLastCommentary();
+  }, [matchId]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -37,13 +77,30 @@ const AddCommentaryForm: React.FC<AddCommentaryFormProps> = ({ matchId, onCommen
       if (formData.over < 0 || formData.ball < 0 || formData.ball > 6) {
         throw new Error('Invalid over or ball number');
       }
-
+      
       await addCommentary(matchId, formData);
       onCommentaryAdded();
 
-      // Reset form for runs and description
+      // Calculate next ball position after submitting this commentary
+      let nextOver = formData.over;
+      let nextBall = formData.ball;
+      
+      // If it's not a wide or no-ball, increment the ball count
+      if (!['wide'].includes(formData.eventType)) {
+        nextBall++;
+      }
+      
+      // If we've reached 6 balls, move to next over
+      if (nextBall > 5) {
+        nextOver++;
+        nextBall = 0;
+      }
+      
+      // Reset form for next entry
       setFormData(prev => ({
         ...prev,
+        over: nextOver,
+        ball: nextBall,
         runs: 0,
         description: '',
       }));
@@ -56,7 +113,7 @@ const AddCommentaryForm: React.FC<AddCommentaryFormProps> = ({ matchId, onCommen
   };
 
   return (
-    <div className="form">
+    <div className="form glass-card">
       <h3>Add Commentary</h3>
       {error && <div style={{ color: 'red', marginBottom: '10px' }}>{error}</div>}
       <form onSubmit={handleSubmit}>
@@ -71,6 +128,7 @@ const AddCommentaryForm: React.FC<AddCommentaryFormProps> = ({ matchId, onCommen
               value={formData.over}
               onChange={handleChange}
               required
+              className="glass-input"
             />
           </div>
           <div className="form-group">
@@ -84,6 +142,7 @@ const AddCommentaryForm: React.FC<AddCommentaryFormProps> = ({ matchId, onCommen
               value={formData.ball}
               onChange={handleChange}
               required
+              className="glass-input"
             />
           </div>
           <div className="form-group">
@@ -94,6 +153,7 @@ const AddCommentaryForm: React.FC<AddCommentaryFormProps> = ({ matchId, onCommen
               value={formData.eventType}
               onChange={handleChange}
               required
+              className="glass-input"
             >
               <option value="run">Run</option>
               <option value="wicket">Wicket</option>
@@ -115,6 +175,7 @@ const AddCommentaryForm: React.FC<AddCommentaryFormProps> = ({ matchId, onCommen
               min="0"
               value={formData.runs}
               onChange={handleChange}
+              className="glass-input"
             />
           </div>
         )}
@@ -129,6 +190,7 @@ const AddCommentaryForm: React.FC<AddCommentaryFormProps> = ({ matchId, onCommen
               value={formData.batsman}
               onChange={handleChange}
               placeholder="Batsman name"
+              className="glass-input"
             />
           </div>
           <div className="form-group">
@@ -140,6 +202,7 @@ const AddCommentaryForm: React.FC<AddCommentaryFormProps> = ({ matchId, onCommen
               value={formData.bowler}
               onChange={handleChange}
               placeholder="Bowler name"
+              className="glass-input"
             />
           </div>
         </div>
@@ -153,11 +216,12 @@ const AddCommentaryForm: React.FC<AddCommentaryFormProps> = ({ matchId, onCommen
             onChange={handleChange}
             placeholder="Add additional details here"
             rows={3}
+            className="glass-input"
           />
         </div>
 
         <button
-          className="button"
+          className="button glass-button"
           type="submit"
           disabled={isSubmitting}
         >
