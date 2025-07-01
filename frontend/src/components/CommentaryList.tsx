@@ -17,8 +17,16 @@ interface CommentaryListProps {
 
 const CommentaryList: React.FC<CommentaryListProps> = ({ commentary }) => {
   const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleTimeString();
+    try {
+      // Check if the date string is valid
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) {
+        return 'Just now';
+      }
+      return date.toLocaleTimeString();
+    } catch (error) {
+      return 'Just now';
+    }
   };
 
   const formatOvers = (over: number, ball: number) => {
@@ -26,7 +34,7 @@ const CommentaryList: React.FC<CommentaryListProps> = ({ commentary }) => {
   };
 
   if (commentary.length === 0) {
-    return <div>No commentary available yet</div>;
+    return <div className="no-commentary">No commentary available yet</div>;
   }
 
   return (
@@ -34,11 +42,15 @@ const CommentaryList: React.FC<CommentaryListProps> = ({ commentary }) => {
       {commentary.map((item, index) => (
         <div key={index} className="commentary-item">
           <div className="commentary-meta">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
             {formatOvers(item.over, item.ball)} overs
             <span className={`commentary-type ${item.eventType}`}>
               {item.eventType.toUpperCase()}
             </span>
-            <span style={{ marginLeft: '10px' }}>{formatDate(item.timestamp)}</span>
+            <span className="commentary-time">{formatDate(item.timestamp)}</span>
           </div>
           <div className="commentary-text">
             {item.eventType === 'run' && item.runs !== undefined && (
